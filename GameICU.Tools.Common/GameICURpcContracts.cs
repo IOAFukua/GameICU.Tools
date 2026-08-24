@@ -25,4 +25,22 @@ public static partial class GameICURpcContracts
     /// payload 格式：多个区域用 ';' 分隔，每个区域为 "areaId|s:startedIds|f:finishedIds"。
     /// </summary>
     [ServerToClient] public static partial void MovieStatesResult(string payload);
+
+    /// <summary>
+    /// GameICU 增强：请求服务器登记一个"虚拟挂机玩家"（addbot 命令）。
+    /// 登记后所有客户端的过场等待判定都会把该挂机玩家计入（永远未到齐），
+    /// 从而真实模拟"有人挂机导致等待卡住"，可用 force_cg 解救。
+    /// </summary>
+    [ClientToServer] public static partial void AddBot(string nickname);
+
+    /// <summary>
+    /// GameICU 增强：移除虚拟挂机玩家（removebot 命令）。
+    /// </summary>
+    [ClientToServer] public static partial void RemoveBot();
+
+    /// <summary>
+    /// GameICU 增强：服务器广播挂机玩家状态。
+    /// payload 格式："1|昵称"（有挂机玩家）或空字符串（无）。
+    /// </summary>
+    [ServerToClient] public static partial void BotStatus(string payload);
 }

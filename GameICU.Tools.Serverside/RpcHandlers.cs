@@ -55,4 +55,40 @@ public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
             first = false;
         }
     }
+
+    private string? _botNickname;
+
+    /// <summary>
+    /// GameICU 增强：addbot 命令的服务器侧处理。
+    /// 登记一个虚拟挂机玩家并广播给所有在线玩家。
+    /// </summary>
+    partial void OnAddBot(RpcContext context, string nickname)
+    {
+        if (_botNickname != null)
+        {
+            // 已有挂机玩家，回当前状态
+            SendBotStatus(context.Sender, $"1|{_botNickname}");
+            return;
+        }
+
+        _botNickname = string.IsNullOrWhiteSpace(nickname) ? "挂机bot" : nickname;
+        var payload = $"1|{_botNickname}";
+        ecs.Query<PlayerScopeComponent>((ref PlayerScopeComponent scope) =>
+        {
+            SendBotStatus(scope.PlayerId, payload);
+        });
+    }
+
+    /// <summary>
+    /// GameICU 增强：removebot 命令的服务器侧处理。
+    /// 移除虚拟挂机玩家并广播给所有在线玩家。
+    /// </summary>
+    partial void OnRemoveBot(RpcContext context)
+    {
+        _botNickname = null;
+        ecs.Query<PlayerScopeComponent>((ref PlayerScopeComponent scope) =>
+        {
+            SendBotStatus(scope.PlayerId, "");
+        });
+    }
 }

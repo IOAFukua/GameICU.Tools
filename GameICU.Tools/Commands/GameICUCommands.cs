@@ -20,6 +20,8 @@ public static class GameICUCommands
         consoleApi.AddCommand("test_wait", ConsoleCommand.Create(TestWait, false));
         consoleApi.AddCommand("tpall", ConsoleCommand.Create(TeleportAllToHost, false));
         consoleApi.AddCommand("cglist", ConsoleCommand.Create(CgList, false));
+        consoleApi.AddCommand("addbot", ConsoleCommand.Create(AddBot, false));
+        consoleApi.AddCommand("removebot", ConsoleCommand.Create(RemoveBot, false));
     }
 
     /// <summary>
@@ -196,5 +198,27 @@ public static class GameICUCommands
         Logging.LogDebug("[GameICU] cglist requested: area={Area}, done={Done}, undone={Undone}", isArea, isDone, isUndone);
         CgListCommands.PendingQuery = new CgListQuery(isArea, isDone, isUndone);
         WukongApi.Services.Resolve<GameICUServerRpc>()?.SendQueryMovieStates();
+    }
+
+    /// <summary>
+    /// GameICU 增强：添加一个虚拟挂机玩家（addbot 命令）。
+    /// 服务器登记后广播给所有人，过场等待会把该挂机玩家算入"未到齐"，
+    /// 模拟正常游玩中有人挂机的场景；force_cg 可照常解救。
+    /// 用法：addbot [昵称]
+    /// </summary>
+    private static void AddBot(string nickname = "")
+    {
+        WukongApi.Services.Resolve<GameICUServerRpc>()?.SendAddBot(nickname);
+        WukongApi.Chat.ShowLocalMessage("[addbot] 已请求添加挂机玩家", FLinearColor.Green);
+    }
+
+    /// <summary>
+    /// GameICU 增强：移除虚拟挂机玩家（removebot 命令）。
+    /// 用法：removebot
+    /// </summary>
+    private static void RemoveBot()
+    {
+        WukongApi.Services.Resolve<GameICUServerRpc>()?.SendRemoveBot();
+        WukongApi.Chat.ShowLocalMessage("[removebot] 已请求移除挂机玩家", FLinearColor.Green);
     }
 }

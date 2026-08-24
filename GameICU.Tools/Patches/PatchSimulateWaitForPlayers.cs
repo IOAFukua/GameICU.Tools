@@ -1,5 +1,6 @@
 using System.Reflection;
 using HarmonyLib;
+using GameICU.Tools;
 
 namespace GameICU.Tools.Patches;
 
@@ -43,7 +44,9 @@ public static class PatchSimulateWaitForPlayers
 
     public static void Postfix(ref bool __result)
     {
-        if (SimulateEnabled)
+        // 测试模式（test_wait）或存在虚拟挂机玩家（addbot）时，
+        // 一律判定"还有玩家未到齐" → 过场等待界面卡住，force_cg 可放行。
+        if (SimulateEnabled || GameICUBotState.HasBot)
             __result = false;
     }
 }

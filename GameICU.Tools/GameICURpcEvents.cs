@@ -6,6 +6,7 @@ using ReadyM.Api.Multiplayer.RPC;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Sdk.Api;
 
 namespace GameICU.Tools;
 
@@ -27,19 +28,20 @@ public partial class GameICURpcEvents : ClientRpcHandler
 
     private static void TeleportLocalPlayerTo(float x, float y, float z, float yaw)
     {
-        var pawn = GameUtils.GetControlledPawn();
-        if (pawn == null)
+        var local = WukongApi.Sync.LocalMainCharacter;
+        if (!local.HasValue)
+        {
+            Logging.LogDebug("[GameICU] Teleport skipped: no local main character");
             return;
+        }
 
-        var location = new FVector(x, y, z);
-        var rotation = pawn.GetActorRotation();
-        rotation.Yaw = yaw;
+        // 官方公开传送 API：内部走 PlayerUtils.TeleportLocalPlayer 完整路径
+        // （GetCorrectedSpawnLocation 落点修正 + TeleportFinishFrames 传送收尾 + 相机弹簧臂重置），
+        // 避免手写 SetActorTransform 导致传送后移动/跳跃视角异常。
+        local.Value.Teleport(
+            new System.Numerics.Vector3(x, y, z),
+            new System.Numerics.Vector3(0f, yaw, 0f)); // Euler (Pitch=0, Yaw, Roll=0)
 
-        // 与 SDK PlayerUtils.TeleportLocalPlayer 相同的传送路径（公开 API 复刻）
-        BUS_EventCollectionCS.Get(pawn)?.Evt_UnitStateTrigger.Invoke(EBUStateTrigger.TeleportBegin, -1f);
-        pawn.SetActorTransform(new FTransform(rotation, location), false, out _, true);
-        BUS_EventCollectionCS.Get(pawn)?.Evt_ResetCameraSpringArmRot.Invoke();
-
-        Logging.LogDebug("[GameICU] Force-teleported local player to ({X}, {Y}, {Z})", x, y, z);
+        Logging.LogDebug("[GameICU] Teleported local player to ({X}, {Y}, {Z}) yaw={Yaw}", x, y, z, yaw);
     }
 }
