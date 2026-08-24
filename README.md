@@ -5,6 +5,7 @@
 
 - **版本**：v1.0（第一版）
 - **作者**：GameICU
+- **仓库**：https://github.com/IOAFukua/GameICU.Tools
 - **依赖**：WukongMp.Sdk ≥ 0.3.1（官方 Coop 自带）
 
 ---
