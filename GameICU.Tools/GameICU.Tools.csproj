@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>14</LangVersion>
+        <OutputType>Library</OutputType>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\GameICU.Tools.Common\GameICU.Tools.Common.csproj"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <UseSdkProjectReferences Condition="'$(UseSdkProjectReferences)' == ''">false</UseSdkProjectReferences>
+        <WukongSdkRoot Condition="'$(WukongSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\..\wukongmp-sdk</WukongSdkRoot>
+        <CoreSdkRoot Condition="'$(CoreSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\..\readym-core-sdk</CoreSdkRoot>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'false'">
+        <PackageReference Include="ReadyM.SDK.Wukong.Client" Version="0.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.8"/>
+        <!-- Reference-only assemblies for the game. Compile-time only, the real
+             assemblies are already loaded in the game process at runtime. -->
+        <PackageReference Include="ReadyM.Wukong.GameRefs" Version="1.0.21.23831" />
+    </ItemGroup>
+</Project>
